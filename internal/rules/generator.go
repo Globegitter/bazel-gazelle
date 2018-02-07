@@ -150,6 +150,9 @@ func (g *Generator) generateBin(pkg *packages.Package, library string) bf.Expr {
 
 func (g *Generator) generateLib(pkg *packages.Package, goProtoName string) (string, *bf.CallExpr) {
 	name := g.l.LibraryLabel(pkg.Rel).Name
+	if goProtoName != "" {
+		return "", EmptyRule("go_library", name)
+	}
 	if !pkg.Library.HasGo() && goProtoName == "" {
 		return "", EmptyRule("go_library", name)
 	}
@@ -163,9 +166,6 @@ func (g *Generator) generateLib(pkg *packages.Package, goProtoName string) (stri
 
 	attrs := g.commonAttrs(pkg.Rel, name, visibility, pkg.Library)
 	attrs = append(attrs, KeyValue{"importpath", pkg.ImportPath})
-	if goProtoName != "" {
-		attrs = append(attrs, KeyValue{"embed", []string{":" + goProtoName}})
-	}
 
 	rule := NewRule("go_library", attrs)
 	return name, rule
